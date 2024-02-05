@@ -13,21 +13,17 @@ const OTPSchema = new mongoose.Schema({
 	createdAt: {
 		type: Date,
 		default: Date.now,
-		expires: 60 * 5, // The document will be automatically deleted after 5 minutes of its creation time
+		expires: 60 * 5, //document preserved for 5 min
 	},
 });
 
-// Define a function to send emails
+
 async function sendVerificationEmail(email, otp) {
-	// Create a transporter to send emails
-
-	// Define the email options
-
-	// Send the email
+	
 	try {
 		const mailResponse = await mailSender(
 			email,
-			"Verification Email",
+			"Verification Email from StudyBot",
 			emailTemplate(otp)
 		);
 		console.log("Email sent successfully: ", mailResponse.response);
@@ -37,16 +33,17 @@ async function sendVerificationEmail(email, otp) {
 	}
 }
 
-// Define a post-save hook to send email after the document has been saved
-OTPSchema.pre("save", async function (next) {
-	console.log("New document saved to database");
+// pre-save hook to send email
+OTPSchema.pre("save",async function(next){
+	console.log("new document created");
 
-	// Only send an email when a new document is created
-	if (this.isNew) {
-		await sendVerificationEmail(this.email, this.otp);
+	// sending email only if it is new
+	if(this.isNew)
+	{
+		await sendVerificationEmail(this.email,this.otp);
 	}
 	next();
-});
+})
 
 const OTP = mongoose.model("OTP", OTPSchema);
 
